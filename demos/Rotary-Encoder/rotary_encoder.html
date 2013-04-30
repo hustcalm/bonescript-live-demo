@@ -1,0 +1,205 @@
+﻿<!doctype html>
+<html>
+  <head>
+    <title>Rotary Encoder Demo</title>
+
+    <script src="/json.js"></script> <!-- for ie -->
+    <script src="/socket.io/socket.io.js"></script>
+
+    <link href="layout.css" rel="stylesheet" type="text/css">
+    <script src="jquery.js"></script>
+    <script src="jquery.flot.js"></script>
+    <script src="jquery.flot.navigate.js"></script>
+  </head>
+  <body>
+    <h1>Rotary Encoder Demo <a href="http://Rose-Hulman.edu" target="_blank">
+        <img src="RoseLogo96.png" width=200 style="float:right"></a></h1>
+    <button id="connect" onClick='connect()'/>Connect</button>
+    <button id="disconnect" onClick='disconnect()'>Disconnect</button>
+<!--    <button id="send" onClick='send()'/>Send Message</button> -->
+<table>
+<tr>
+    <td><div id="plotTop" style="width:550px;height:150px;"></div>
+<center>samples</center></td>
+</tr>
+<tr>
+    <td><div id="plotBot" style="width:550px;height:150px;"></div>
+<center>samples<center></td>
+</tr>
+</table>
+
+<br />
+<br />
+
+    <a href="http://beagleboard.org" target="_blank">
+        <img src="beagle-hd-logo.gif" width=200 align="right"></a>
+    <div><p id="status">Waiting for input</p></div>
+    <div><p id="ticks"></p></div>
+    <a href="http://www.ti.com/sitara" target="_blank">
+        <img src="hdr_ti_logo.gif" width=200 align="right"></a>
+By <i>John Lobdell</i>
+<br />
+
+    <script>
+
+    var socket;
+    var firstconnect = true,
+        fs = 8000,
+        Ts = 1/fs*1000,
+        samples = 100,
+        plotTop,
+        enc_a = [], ienc_a = 0,
+	enc_b = [], ienc_b = 0,
+        sw_data = [], isw_data = 0,
+        gpio_enc_a = 38,
+	gpio_enc_b = 47,
+	gpio_sw = 48;
+
+    enc_a[samples] = 0;
+    enc_b[samples] = 0;
+    sw_data[samples] = 0;
+
+    function connect() {
+      if(firstconnect) {
+        socket = io.connect(null);
+
+        socket.on('message', function(data)
+            { status_update("Received: message");});
+        socket.on('connect', function()
+            { status_update("Connected to Server"); });
+        socket.on('disconnect', function()
+            { status_update("Disconnected from Server"); });
+        socket.on('reconnect', function()
+            { status_update("Reconnected to Server"); });
+        socket.on('reconnecting', function( nextRetry )
+            { status_update("Reconnecting in " + nextRetry/1000 + " s"); });
+        socket.on('reconnect_failed', function()
+            { message("Reconnect Failed"); });
+
+        socket.on('enc_a', enca);
+        socket.on('enc_b', encb);
+        socket.on('enc_sw', encsw);
+        socket.on('set_ticks', setTicks);
+
+        firstconnect = false;
+
+      }
+      else {
+        socket.socket.reconnect();
+      }
+    }
+
+    function disconnect() {
+      socket.disconnect();
+    }
+
+    // When new data arrives, convert it and plot it.
+    function enca(data) {
+//	status_update("enc_a " + data);
+        data = atob(data);
+        enc_a[ienc_a] = [ienc_a, data];
+        ienc_a++;
+        if (ienc_a >= samples) {
+            ienc_a = 0;
+            enc_a = [];
+        }
+        plotTop.setData([ enc_a, enc_b ]);
+        plotTop.draw();
+    }
+
+    function encb(data) {
+//	status_update("enc_b " + data);
+        data = atob(data);
+        enc_b[ienc_b] = [ienc_b, data];
+        ienc_b++;
+        if (ienc_b >= samples) {
+            ienc_b = 0;
+            enc_b = [];
+        }
+        plotTop.setData([ enc_a, enc_b ]);
+        plotTop.draw();
+    }
+
+    function encsw(data) {
+//        status_update("encsw " + data);
+        data = atob(data);
+        sw_data[isw_data] = [isw_data, data];
+        isw_data++;
+        if (isw_data >= samples) {
+            isw_data = 0;
+            sw_data = [];
+        }
+        plotBot.setData([ sw_data ]);
+        plotBot.draw();
+    }
+
+    function status_update(txt){
+      document.getElementById('status').innerHTML = txt;
+    }
+
+    function setTicks(numTicks){
+        document.getElementById('ticks').innerHTML = "Ticks: " + numTicks;
+    }
+
+    connect();
+
+$(function () {
+
+    function initPlotData() {
+        // zip the generated y values with the x values
+        var result = [];
+        for (var i = 0; i <= samples; i++)
+            result[i] = [i, 0];
+        return result;
+    }
+
+    // setup plot
+    var optionsTop = {
+        series: { 
+            shadowSize: 0, // drawing is faster without shadows
+            points: { show: false},
+            lines:  { show: true, lineWidth: 5},
+        }, 
+        yaxis:	{ min: 0, max: 2, 
+                  zoomRange: [10, 256], panRange: [-128, 128] },
+        xaxis:	{ show: true, 
+                  zoomRange: [10, 100], panRange: [0, 100] },
+        legend:	{ position: "sw" },
+        zoom:	{ interactive: true, amount: 1.1 },
+        pan:	{ interactive: true }
+    };
+    plotTop = $.plot($("#plotTop"), 
+        [ 
+          { data:  initPlotData(), 
+            label: "Encoder A" },
+          { data:  initPlotData(),
+            label: "Encoder B" }
+        ],
+            optionsTop);
+
+    var optionsBot = {
+        series: {
+            shadowSize: 0, // drawing is faster without shadows
+            points: { show: false},
+            lines:  { show: true, lineWidth: 5},
+            color: 2
+        },
+        yaxis:  { min: 0, max: 2,
+                  zoomRange: [10, 256], panRange: [-128, 128] },
+        xaxis:  { show: true,
+                  zoomRange: [10, 100], panRange: [0, 100] },
+        legend: { position: "sw" },
+        zoom:   { interactive: true, amount: 1.1 },
+        pan:    { interactive: true }
+    };
+    plotBot = $.plot($("#plotBot"),
+        [
+            { data:  initPlotData(),
+              label: "Encoder Switch"}
+        ],
+            optionsBot);
+});
+</script>
+
+  </body>
+</html>
