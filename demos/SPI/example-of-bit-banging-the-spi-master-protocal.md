@@ -42,7 +42,7 @@ Below is an example of [bit-banging](http://en.wikipedia.org/wiki/Bit-banging) t
       }
    
       return byte;
-  }
+    }
 
     unsigned char SPI_read_byte()
     {
