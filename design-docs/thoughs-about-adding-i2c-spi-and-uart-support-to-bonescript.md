@@ -1,7 +1,7 @@
 In this doc, I will focus on talking about adding I2C, SPI and UART support to Bonescript.
 
 ## Preface
-[Bonescript](https://github.com/jadonk/bonescript) has come with a bunch of APIs but limited to low level I/O operation, to provide higher-order services that utilize the standard peripherals for their intended use, we try to implement I2C, SPI and UART here.
+[Bonescript](https://github.com/jadonk/bonescript) has come with a bunch of APIs but limited to low level I/O operation, to provide higher-order services that utilize the standard peripherals for their intended use, we try to implement I2C, SPI and UART here and we will make use the very basic infrastructure already armed with Bonesrcipt,especially the GPIO APIs.
 
 **Below I will take an overview of these protocals, provide some implementaion references and give the core routines to be implemented in Bonescript.**
 
