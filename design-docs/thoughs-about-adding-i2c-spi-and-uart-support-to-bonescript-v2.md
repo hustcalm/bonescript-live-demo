@@ -8,8 +8,11 @@ This is also a draft one, need further discussions.
 Through read/write to related files.
 
 For example, to open BMP085, we simply do this:
+
 	fs.writeFileSync('/sys/class/i2c-adapter/i2c-3/new_device', 'bmp085 0x77', encoding='ascii');
+
 To read data, do this:
+
 	fs.readFile(pfileData);
 
 ### Potential core APIs added to Bonescript
