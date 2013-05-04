@@ -5,4 +5,4 @@ First, let's start the trip with beaglebone and get more familiar with it. Some 
 *   [BeagleBone Getting Started Guide from Jan Axelson](http://www.lvr.com/beaglebone.htm)
 *   [Get Started with BeagleBone from Makezine](http://blog.makezine.com/projects/get-started-with-beaglebone/)
 *   [Hitchhikers Guide to the BeagleBone (and ARMv7a)](http://wiki.sabayon.org/index.php?title=Hitchhikers_Guide_to_the_BeagleBone_%28and_ARMv7a%29)
-
+*   [Interfacing with I2C Devices](http://elinux.org/Interfacing_with_I2C_Devices)
