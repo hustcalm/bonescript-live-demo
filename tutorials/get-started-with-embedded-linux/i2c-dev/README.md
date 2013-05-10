@@ -8,3 +8,5 @@ To access I2C device in user mode using i2c-dev module.
 ## lm-sensors Documentation
 *	[lm-sensors Documentation Root](http://www.lm-sensors.org/browser/lm-sensors/trunk/doc)
 
+## I2C/SMBus Information and i2c-tools Documentation
+*	[Documentation Root](http://lm-sensors.org/wiki/I2CTools_Documentation)
